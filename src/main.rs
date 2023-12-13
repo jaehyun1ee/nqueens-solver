@@ -109,17 +109,21 @@ fn encode_board<'c>(context: &'c Context) -> Vec<Vec<Bool<'c>>> {
     board
 }
 
-fn decode_board<'c>(board: &Vec<Vec<Bool<'c>>>, solution: &Model<'c>) {
+fn decode_board<'c>(board: &Vec<Vec<Bool<'c>>>, solution: &Model<'c>, context: &'c Context) -> Bool<'c> {
+    let mut queens = Vec::new();
     for r in 0..N {
         for c in 0..N {
             let cell = &board[r][c];
             let cell = Bool::as_bool(&solution.eval(cell, true).unwrap()).unwrap();
 
             if cell {
-                println!("Queen at ({},{})", r, c);
+                queens.push(board[r][c].clone());
             }
         }
     }
+    let queens: Vec<&Bool<'_>> = queens.iter().collect();
+
+    Bool::and(&context, queens.as_slice()).not()
 }
 
 fn main() {
@@ -138,11 +142,17 @@ fn main() {
     let problem = Bool::and(&context, &[&row, &column, &diagonal]);
     solver.assert(&problem);
 
-    match solver.check() {
-        SatResult::Sat => {
-            let solution = solver.get_model().unwrap();
-            decode_board(&board, &solution);
+    let mut count: usize = 0;
+    loop {
+        match solver.check() {
+            SatResult::Sat => {
+                let solution = solver.get_model().unwrap();
+                let solution = decode_board(&board, &solution, &context);
+                solver.assert(&solution);
+                count += 1;
+            }
+            _ => break 
         }
-        _ => println!("No solution.")
     }
+    println!("Total number of solutions: {}.", count);
 }
