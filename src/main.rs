@@ -59,7 +59,7 @@ fn encode_column<'c>(board: &Vec<Vec<Bool<'c>>>, context: &'c Context) -> Bool<'
 fn encode_diagonal<'c>(board: &Vec<Vec<Bool<'c>>>, context: &'c Context) -> Bool<'c> {
     let mut define = Vec::new();
 
-    // Definedness for major diagonal
+    // Uniqueness for major diagonal
     for d in 0..N {
         for i in 0..(N - d) {
             for j in (i + 1)..(N - d) {
@@ -75,7 +75,7 @@ fn encode_diagonal<'c>(board: &Vec<Vec<Bool<'c>>>, context: &'c Context) -> Bool
         }
     }
 
-    // Definedness for minor diagonal
+    // Uniqueness for minor diagonal
     for s in 0..N {
         for i in 0..=s {
             for j in (i + 1)..=s {
